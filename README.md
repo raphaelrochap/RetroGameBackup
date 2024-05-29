@@ -6,9 +6,11 @@
 
 O Retro Game Backup é uma aplicação que tem por intençao disponibilizar a possibilidade de realizar backup dos seus Saves/States e até dos jogos do seu Retro Console. Nele você coloca os diretório de Origem e Destino, e após algumas pequenas configurações ele mapeia todos os arquivos do seu console e realiza o backup de todos conforme as configurações feitas.
 
-## Baixar o Executável
+## Baixar o Instalador
 
-Ainda não disponibilizado...
+O Download pode ser feito através do link: https://drive.google.com/file/d/1X-dVYWVjWDzATQM_-3yqFrWKEVZ3j-Yd/view?usp=sharing
+
+Ou pode ser encontrado na pasta 'download' deste repositório.
 
 ## Baixar os Fontes
 
