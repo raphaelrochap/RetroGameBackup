@@ -1,0 +1,12 @@
+appId: com.raphael.rocha.retrogamebackup
+productName: RGB - Retro Game Backup
+copyright: Copyright © 2024 Raphael da Rocha
+directories:
+  output: dist
+  buildResources: resources
+files:
+  - from: .
+    filter:
+      - package.json
+      - app
+publish: null
