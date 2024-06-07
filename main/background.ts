@@ -15,67 +15,63 @@ ipcMain.on('selectFolder', async (event, value) => {
 })
 
 ipcMain.on('transfer', async (event, values) => {
-  var extJogos = values.extensoesJogos.filter(v => v.checked).map(v => v.extension)
-  var extSaves = values.extensoesSaves.filter(v => v.checked).map(v => v.extension)
-  var substituiArquivos = values.substituiArquivos
-  const files = fs.readdirSync(values.origemPath, { withFileTypes: true, recursive: true })
-    .filter((v) => v.isFile())
-    .filter(v => {
-      if (values.chkBackupTodos)
-        return true
-      else if (extJogos.length === 0 && extSaves.length === 0)
-        return false
+  const extJogos = values.extensoesJogos.filter(v => v.checked).map(v => v.extension);
+  const extSaves = values.extensoesSaves.filter(v => v.checked).map(v => v.extension);
+  const substituiArquivos = values.substituiArquivos;
 
-      let fileExtension = path.extname(v.name).replace('.', '')
-      if (fileExtension.includes('state'))
-        fileExtension = 'state'
-      return extJogos.includes(fileExtension) || extSaves.includes(fileExtension)
-    })
-    .map((v) => v.path + "\\" + v.name)
+  const getAllFiles = (dirPath, arrayOfFiles) => {
+    const files = fs.readdirSync(dirPath);
 
-  event.reply('total', files.length)
+    arrayOfFiles = arrayOfFiles || [];
 
-  var progress = 0
+    files.forEach((file) => {
+      if (fs.statSync(path.join(dirPath, file)).isDirectory()) {
+        arrayOfFiles = getAllFiles(path.join(dirPath, file), arrayOfFiles);
+      } else {
+        arrayOfFiles.push(path.join(dirPath, file));
+      }
+    });
+
+    return arrayOfFiles;
+  };
+
+  const files = getAllFiles(values.origemPath, [])
+    .filter((file) => {
+      if (values.chkBackupTodos) return true;
+      if (extJogos.length === 0 && extSaves.length === 0) return false;
+
+      let fileExtension = path.extname(file).replace('.', '');
+      if (fileExtension.includes('state')) fileExtension = 'state';
+      return extJogos.includes(fileExtension) || extSaves.includes(fileExtension);
+    });
+
+  event.reply('total', files.length);
+
+  let progress = 0;
   for (const file of files) {
-    progress++
-    event.reply('progresso', progress)
-    const fileParts = file.split('\\')
-    var pathTest = ''
-    const origemParts = values.origemPath.split('\\')
+    progress++;
+    event.reply('progresso', progress);
 
-    for (var j = origemParts.length; j < fileParts.length - 1; j++) {
-      pathTest += "\\" + fileParts[j]
-    }
+    const relativePath = path.relative(values.origemPath, path.dirname(file));
+    const destinationDir = path.join(values.destinoPath, relativePath);
 
-    pathTest = values.destinoPath + pathTest
+    fs.mkdirSync(destinationDir, { recursive: true });
 
-    var pasta = ''
-    var pathParts = pathTest.split("\\")
-    for (var k = 0; k < pathParts.length; k++) {
-      pasta += pathParts[k] + "\\"
-      if (!fs.existsSync(pasta)) {
-        fs.mkdir(pasta, (err) => {
-          if (err) throw err;
-        });
+    const destinationFile = path.join(destinationDir, path.basename(file));
+
+    event.reply('nome', file);
+    try {
+      fs.copyFileSync(file, destinationFile, substituiArquivos ? 0 : fs.constants.COPYFILE_EXCL);
+    } catch (error) {
+      if (error.code === 'EEXIST') {
+        event.reply('log', { text: `${file} não foi transferido pois o mesmo já existe na pasta destino...\n`, error: true });
+      } else {
+        event.reply('log', { text: `${file} não foi transferido pois um erro inesperado ocorreu...\n`, error: true });
       }
     }
-    const ultimo = file.split("\\")
-    const ultimoIdx = file.split("\\").length - 1
-
-    var destino = pathTest + "\\" + ultimo[ultimoIdx]
-
-    event.reply('nome', file)
-    try {
-      fs.copyFileSync(file, destino, substituiArquivos ? null : fs.constants.COPYFILE_EXCL);
-    } catch (error) {
-      if (error.code == 'EEXIST')
-        event.reply('log', { text: `${file} não foi transferido pois o mesmo já existe na pasta destino...\n`, error: true })
-      else
-        event.reply('log', { text: `${file} não foi transferido pois um erro inesperado ocorreu...\n`, error: true })
-    }
   }
-  event.reply('fim')
-})
+  event.reply('fim');
+});
 
 if (isProd) {
   serve({ directory: 'app' })

@@ -8,7 +8,7 @@ O Retro Game Backup é uma aplicação que tem por intençao disponibilizar a po
 
 ## Baixar o Instalador
 
-O Download pode ser feito através do link: https://drive.google.com/file/d/1X-dVYWVjWDzATQM_-3yqFrWKEVZ3j-Yd/view?usp=sharing
+O Download pode ser feito através do link: https://drive.google.com/file/d/1TyuPsbAbIKMnN5j6Kp-B2_-8FuazKe-0
 
 Ou pode ser encontrado na pasta 'download' deste repositório.
 
